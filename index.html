@@ -174,8 +174,8 @@
                     date: new Date().toLocaleDateString('th-TH'), // ✅ วันที่ล้วน
                     height: Number(plantHeight),
                     size: Number(plantSize),
-                    heightUnit: 'cm',
-                    sizeUnit: 'cm',
+                    heightUnit: 'mm',
+                    sizeUnit: 'mm',
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 };
 
@@ -482,8 +482,8 @@
                                                         <YAxis />
                                                         <Tooltip />
                                                         <Legend />
-                                                        <Line type="monotone" dataKey="height" name="Height (cm)" stroke="#10b981" />
-                                                        <Line type="monotone" dataKey="size" name="Size (cm)" stroke="#3b82f6" />
+                                                        <Line type="monotone" dataKey="height" name="Height (mm)" stroke="#10b981" />
+                                                        <Line type="monotone" dataKey="size" name="Size (mm)" stroke="#3b82f6" />
                                                     </LineChart>
                                                 ) : (
                                                     <BarChart data={plantHistory}>
@@ -492,8 +492,8 @@
                                                         <YAxis />
                                                         <Tooltip />
                                                         <Legend />
-                                                        <Bar dataKey="height" name="Height (cm)" fill="#10b981" />
-                                                        <Bar dataKey="size" name="Size (cm)" fill="#3b82f6" />
+                                                        <Bar dataKey="height" name="Height (mm)" fill="#10b981" />
+                                                        <Bar dataKey="size" name="Size (mm)" fill="#3b82f6" />
                                                     </BarChart>
                                                 )}
                                             </ResponsiveContainer>
@@ -585,7 +585,7 @@
                                 <div className="space-y-3">
                                     <input
                                         type="number"
-                                        placeholder="ความสูงต้นไม้ (cm)"
+                                        placeholder="ความสูงต้นไม้ (mm)"
                                         value={plantHeight}
                                         onChange={e => setPlantHeight(e.target.value)}
                                         className="w-full border rounded-xl p-2 text-sm text-black"
