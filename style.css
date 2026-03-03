@@ -48,10 +48,6 @@ body {
 
 #toggleChart {
     justify-self: end;
-}
-
-#toggleChart {
-    justify-self: end;
     width: auto;        /* กันยืด */
     max-width: max-content;
 }

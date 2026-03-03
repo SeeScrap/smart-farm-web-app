@@ -44,6 +44,8 @@
         } = window.Recharts;
         const { useState, useEffect } = React;
 
+        // ⚠️ SECURITY: อย่า commit ไฟล์นี้ขึ้น public repository เพราะมี API Key อยู่
+        // ควรใช้ Firebase Security Rules เพื่อจำกัดสิทธิ์การเข้าถึง Firestore
         const firebaseConfig = {
             apiKey: "AIzaSyBMoyVn465LHPlbZaKAAAChoh2yan8yMMc",
             authDomain: "smart-farm-project-c73c2.firebaseapp.com",
@@ -73,7 +75,7 @@
             const [isLoading, setIsLoading] = useState(true);
             const [error, setError] = useState(null);
 
-            // ✅ NEW STATES (ไม่กระทบของเดิม)
+            // States
             const [showModal, setShowModal] = useState(false);
             const [plantHeight, setPlantHeight] = useState('');
             const [plantSize, setPlantSize] = useState('');
@@ -83,36 +85,9 @@
             const [selectedDate, setSelectedDate] = useState(
                 new Date().toISOString().slice(0, 10)
             );
-            const [showAddForm, setShowAddForm] = useState(false);
-            const [newPlant, setNewPlant] = useState({ name: "", type: "", unit: "", date: "" });
-            const handleAddPlant = async () => {
 
-                if (!newPlant.name) return alert("กรุณาใส่ชื่อต้นไม้");
-                try {
-                    if (db) {
-                        await db
-                            .collection('artifacts')
-                            .doc(appId)
-                            .collection('public')
-                            .doc('data')
-                            .collection('plants')
-                            .add({
-                                name: newPlant.name,
-                                type: newPlant.type,
-                                unit: newPlant.unit,
-                                date: newPlant.date,
-                                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                            });
-                    }
-                    // reset ฟอร์ม
-                    setNewPlant({ name: "", type: "", unit: "", date: "" });
-                    setShowAddForm(false);
-
-                } catch (err) {
-                    console.error(err);
-                    alert("บันทึกไม่สำเร็จ");
-                }
-            };
+            // Map ชื่อ view -> ภาษาไทย
+            const viewLabels = { dashboard: 'แดชบอร์ด', plants: 'ต้นไม้ของฉัน', logs: 'ประวัติข้อมูล' };
 
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
@@ -122,10 +97,10 @@
                 let unsubscribeHistory;
 
                 if (isFirebaseConfigured && db) {
-                    // Path ข้อมูลจาก Raspberry Pi 5
+                    // Path ข้อมูลจาก Raspberry Pi 5 (limit 200 เพื่อรองรับ filter ตามวันที่)
                     const logsRef = db.collection('artifacts').doc(appId).collection('public').doc('data').collection('logs');
 
-                    unsubscribeLogs = logsRef.orderBy('timestamp', 'desc').limit(20).onSnapshot(snapshot => {
+                    unsubscribeLogs = logsRef.orderBy('timestamp', 'desc').limit(200).onSnapshot(snapshot => {
                         const data = snapshot.docs.map(doc => ({
                             id: doc.id,
                             ...doc.data(),
@@ -162,9 +137,10 @@
                 };
             }, []);
 
+            // รวม useEffect ที่ซ้ำซ้อนเป็นอันเดียว
             useEffect(() => {
                 if (window.lucide) window.lucide.createIcons();
-            }, [view, logs, isLoading]);
+            }, [view, logs, isLoading, plants, plantHistory]);
 
             // ✅ เพิ่มข้อมูลต้นไม้
             const handleAddPlantData = async () => {
@@ -243,6 +219,17 @@
 
             const { day, night } = processDayNightData();
 
+            if (isLoading) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center bg-[#020c22]">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                            <p className="text-slate-400 text-sm font-medium">กำลังโหลดข้อมูล...</p>
+                        </div>
+                    </div>
+                );
+            }
+
             return (
                 <div className="min-h-screen flex flex-col md:flex-row pb-20 md:pb-0">
                     {/* PC Sidebar / Mobile Top Brand */}
@@ -251,15 +238,15 @@
                             <i data-lucide="sprout" className="w-8 h-8"></i> <span>SmartFarm</span>
                         </div>
 
-                        {/* PC Navigation Links */}
+                        {/* PC Navigation Links (แก้ contrast สำหรับ dark sidebar) */}
                         <div className="hidden md:flex flex-col gap-2 mt-8 w-full">
-                            <button onClick={() => setView('dashboard')} className={`flex items-center gap-3 p-3 rounded-xl w-full transition-all ${view === 'dashboard' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}>
+                            <button onClick={() => setView('dashboard')} className={`flex items-center gap-3 p-3 rounded-xl w-full transition-all ${view === 'dashboard' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:bg-white/10'}`}>
                                 <i data-lucide="layout-dashboard"></i> <span className="font-medium">แดชบอร์ด</span>
                             </button>
-                            <button onClick={() => setView('plants')} className={`flex items-center gap-3 p-3 rounded-xl w-full transition-all ${view === 'plants' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}>
+                            <button onClick={() => setView('plants')} className={`flex items-center gap-3 p-3 rounded-xl w-full transition-all ${view === 'plants' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:bg-white/10'}`}>
                                 <i data-lucide="flower-2"></i> <span className="font-medium">ต้นไม้ของฉัน</span>
                             </button>
-                            <button onClick={() => setView('logs')} className={`flex items-center gap-3 p-3 rounded-xl w-full transition-all ${view === 'logs' ? 'bg-emerald-50 text-emerald-600 shadow-sm' : 'text-slate-500 hover:bg-slate-50'}`}>
+                            <button onClick={() => setView('logs')} className={`flex items-center gap-3 p-3 rounded-xl w-full transition-all ${view === 'logs' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:bg-white/10'}`}>
                                 <i data-lucide="history"></i> <span className="font-medium">ประวัติข้อมูล</span>
                             </button>
                         </div>
@@ -275,8 +262,8 @@
                     <main className="flex-1 p-4 md:p-8">
                         <header className="hidden md:flex justify-between items-center mb-8">
                             <div className="flex items-center gap-3">
-                                <h1 className="text-2xl font-bold text-slate-800 uppercase tracking-tight">
-                                    {view}
+                                <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+                                    {viewLabels[view]}
                                 </h1>
 
                                 {view === 'plants' && (
@@ -299,7 +286,7 @@
 
                         {/* View Title for Mobile */}
                         <div className="md:hidden mb-4">
-                            <h2 className="text-xl font-bold text-slate-800 capitalize">{view}</h2>
+                            <h2 className="text-xl font-bold text-slate-800">{viewLabels[view]}</h2>
                         </div>
 
                         {error && (
@@ -452,6 +439,17 @@
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
+                                )}
+
+                                {/* ===== EMPTY STATE ===== */}
+                                {plants.length === 0 && plantHistory.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center py-20 text-center fade-up">
+                                        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-4">
+                                            <i data-lucide="sprout" className="w-8 h-8 text-emerald-400"></i>
+                                        </div>
+                                        <p className="text-slate-500 font-medium text-sm">ยังไม่มีข้อมูลต้นไม้</p>
+                                        <p className="text-slate-400 text-xs mt-1">กด "กดเพื่อเพิ่ม" ที่ด้านบนเพื่อบันทึกข้อมูลการเติบโต</p>
                                     </div>
                                 )}
 
