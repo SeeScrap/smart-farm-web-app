@@ -285,8 +285,19 @@
                         </header>
 
                         {/* View Title for Mobile */}
-                        <div className="md:hidden mb-4">
-                            <h2 className="text-xl font-bold text-slate-800">{viewLabels[view]}</h2>
+                        <div className="md:hidden mb-4 flex items-center justify-between">
+                            <h2 className="text-xl font-bold text-slate-800">
+                                {viewLabels[view]}
+                            </h2>
+
+                            {view === 'plants' && (
+                                <button
+                                    onClick={() => setShowModal(true)}
+                                    className="bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-bold"
+                                >
+                                    กดเพื่อเพิ่ม
+                                </button>
+                            )}
                         </div>
 
                         {error && (
