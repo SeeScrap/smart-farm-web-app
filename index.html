@@ -44,15 +44,13 @@
         } = window.Recharts;
         const { useState, useEffect } = React;
 
-        // ⚠️ SECURITY: อย่า commit ไฟล์นี้ขึ้น public repository เพราะมี API Key อยู่
-        // ควรใช้ Firebase Security Rules เพื่อจำกัดสิทธิ์การเข้าถึง Firestore
         const firebaseConfig = {
-            apiKey: "AIzaSyBMoyVn465LHPlbZaKAAAChoh2yan8yMMc",
-            authDomain: "smart-farm-project-c73c2.firebaseapp.com",
-            projectId: "smart-farm-project-c73c2",
-            storageBucket: "smart-farm-project-c73c2.firebasestorage.app",
-            messagingSenderId: "548546992209",
-            appId: "1:548546992209:web:0075fbfc2a48af50f90070"
+            apiKey: "",
+            authDomain: "",
+            projectId: "",
+            storageBucket: "",
+            messagingSenderId: "",
+            appId: ""
         };
 
         const isFirebaseConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
